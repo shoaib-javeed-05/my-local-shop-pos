@@ -130,7 +130,9 @@ pytest -q
 
 ## On AI tools
 
-> **[PLACEHOLDER: to be written by Shoaib before publishing.]**
+I used AI coding assistants (such as Codex and Claude) throughout the development of the app. I designed the data model and the shop workflows, and I tested the features in the running app.
+
+This public showcase (the screenshots, the demo video, the diagrams, the tests and this README) was prepared with Claude Code, an AI coding agent, in November 2026, working from the private code and a local copy of the app with fake data. Using the app end to end for the video also surfaced bugs that are still open in the private code; for example, closing a cashier's shift fails because the code writes to columns that the shifts table does not have.
 
 ## Contact
 
