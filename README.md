@@ -11,7 +11,9 @@ Sold to and used by a mobile-network franchise retail shop in Pakistan.
 
 ## Demo video (2½ minutes)
 
-[![Watch the demo video](docs/screenshots/demo-poster.png)]([docs/video/demo.mp4)](https://youtu.be/WT2TpGqce9U)
+[![Watch the demo video on YouTube](docs/screenshots/demo-poster.png)](https://youtu.be/WT2TpGqce9U)
+
+**[▶ Watch on YouTube](https://youtu.be/WT2TpGqce9U)** (with chapters) · [Download the MP4](docs/video/demo.mp4)
 
 First-run setup, PIN login, adding stock, a purchase order from a supplier, staff, expenses and commissions, then a cashier's checkout, a store-credit sale and a return, and finally the admin's credit ledger, sales dashboard, PDF report, customer records, audit log and printed receipt. **Recorded on a local copy of the app with fake demo data ("Demo Mart").** Chapter times are in [`docs/video/youtube-chapters.txt`](docs/video/youtube-chapters.txt).
 
