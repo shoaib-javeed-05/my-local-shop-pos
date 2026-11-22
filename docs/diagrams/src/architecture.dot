@@ -1,43 +1,53 @@
 // My Local Shop: architecture of the app as it exists in the private repository (Nov 2026).
 // Blue = module published in this showcase repository.
 digraph architecture {
-  graph [rankdir=TB, fontname="Helvetica", fontsize=13, nodesep=0.35, ranksep=0.5, pad=0.3, bgcolor="white", newrank=true];
-  node  [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#888888", fontname="Helvetica", fontsize=11, margin="0.18,0.08"];
+  graph [rankdir=TB, fontname="Helvetica", fontsize=13, nodesep=0.3, ranksep=0.5, pad=0.3, bgcolor="white", newrank=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#888888", fontname="Helvetica", fontsize=11, margin="0.16,0.07"];
   edge  [color="#666666", fontname="Helvetica", fontsize=10, arrowsize=0.7];
 
   main [label=<<b>main.py</b> (Flet app)<br/>desktop window by default;<br/>web server when PORT is set (Render)>];
 
   subgraph cluster_ui {
     label="Flet UI (ui/)"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
-    onboard [label=<<b>Onboarding</b><br/>first run: shop details, admin PIN>];
-    login   [label=<<b>Login</b><br/>pick profile, 6-digit PIN>];
-    layout  [label=<<b>App layout</b><br/>sidebar filtered by role<br/>(Admin / Cashier)>];
-    pos     [label=<<b>POS</b><br/>product grid, cart,<br/>stock check, checkout>];
-    inv     [label=<<b>Inventory</b><br/>products, product codes, stock>];
-    cust    [label=<<b>Customers</b><br/>customer records and history>];
-    dash    [label=<<b>Sales dashboard</b><br/>totals, profit, sales history>];
+    onboard [label=<<b>First-run setup</b><br/>shop details, admin PIN>];
+    login   [label=<<b>Login</b><br/>profile + 6-digit PIN>];
+    layout  [label=<<b>App layout</b><br/>menu filtered by role<br/>(Admin / Manager / Cashier)>];
+    pos     [label=<<b>POS</b><br/>search / barcode, cart, stock check,<br/>discounts, cash or store credit>];
+    ret     [label=<<b>Returns</b><br/>refund by bill and line>];
+    credit  [label=<<b>Credit ledger</b><br/>balances, payments>];
+    cust    [label=<<b>General ledger</b><br/>customers, history>];
+    inv     [label=<<b>Stock</b><br/>codes, batch, expiry,<br/>low-stock levels>];
+    po      [label=<<b>Suppliers and<br/>purchase orders</b>>];
+    fin     [label=<<b>Expenses and<br/>commissions</b>>];
+    staff   [label=<<b>Staff and<br/>audit log</b>>];
+    dash    [label=<<b>Sales dashboard</b><br/>KPIs, leaderboard,<br/>date filters>];
   }
 
   subgraph cluster_util {
     label="utils/"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    guard   [label=<<b>feature_guard.py</b><br/>role and edition checks>];
     money   [label=<<b>money_format.py</b><br/>Decimal rounding, discount labels,<br/>input sanitising>, fillcolor="#e4eefb", color="#2a6fd6"];
     receipt [label=<<b>receipt_gen.py</b><br/>HTML receipt per sale>];
-    pdf     [label=<<b>pdf_export.py</b><br/>PDF sales report (ReportLab)>];
+    pdf     [label=<<b>pdf_export.py</b><br/>PDF report (ReportLab)>];
   }
 
-  db   [label=<<b>DBManager</b> (database/db_manager.py)<br/>sqlite3; totals recomputed with Decimal;<br/>stock deducted when a sale is recorded>];
+  db   [label=<<b>DBManager</b> (database/db_manager.py)<br/>sqlite3; sale totals recomputed with Decimal;<br/>stock moves on sales, returns and received orders;<br/>logins, sales, returns, payments, staff changes logged>];
   file [label=<<b>SQLite file</b><br/>local, no network needed<br/>(path from SHOP_DATABASE_PATH)>, shape=cylinder, style="filled", fillcolor="#f6f6f2"];
-  out  [label=<<b>receipts/</b> (HTML) and PDF exports>, shape=folder, style="filled", fillcolor="#f6f6f2"];
+  out  [label=<<b>receipts/</b> (HTML) and <b>exports/</b> (PDF)>, shape=folder, style="filled", fillcolor="#f6f6f2"];
 
   main -> onboard [label=" first run"];
   main -> login;
   login -> layout;
-  layout -> pos; layout -> inv; layout -> cust; layout -> dash;
-  pos -> money [style=dashed]; inv -> money [style=dashed]; dash -> money [style=dashed]; cust -> money [style=dashed];
+  layout -> guard [style=dashed];
+  layout -> {pos ret credit cust dash};
+  layout -> {inv po fin staff} [constraint=false];
+  {pos ret credit cust inv dash} -> money [style=dashed];
   pos -> receipt [label=" after checkout"];
   dash -> pdf;
   receipt -> out; pdf -> out;
-  pos -> db; inv -> db; cust -> db; dash -> db; login -> db; onboard -> db;
+  {pos ret credit cust inv po fin staff dash login onboard} -> db;
   db -> file;
-  {rank=same; pos; inv; cust; dash}
+  {rank=same; pos; ret; credit; cust; dash}
+  {rank=same; inv; po; fin; staff}
+  pos -> inv [style=invis]; credit -> po [style=invis]; dash -> staff [style=invis];
 }
