@@ -1,0 +1,43 @@
+// My Local Shop: architecture of the app as it exists in the private repository (Nov 2026).
+// Blue = module published in this showcase repository.
+digraph architecture {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=13, nodesep=0.35, ranksep=0.5, pad=0.3, bgcolor="white", newrank=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#888888", fontname="Helvetica", fontsize=11, margin="0.18,0.08"];
+  edge  [color="#666666", fontname="Helvetica", fontsize=10, arrowsize=0.7];
+
+  main [label=<<b>main.py</b> (Flet app)<br/>desktop window by default;<br/>web server when PORT is set (Render)>];
+
+  subgraph cluster_ui {
+    label="Flet UI (ui/)"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    onboard [label=<<b>Onboarding</b><br/>first run: shop details, admin PIN>];
+    login   [label=<<b>Login</b><br/>pick profile, 6-digit PIN>];
+    layout  [label=<<b>App layout</b><br/>sidebar filtered by role<br/>(Admin / Cashier)>];
+    pos     [label=<<b>POS</b><br/>product grid, cart,<br/>stock check, checkout>];
+    inv     [label=<<b>Inventory</b><br/>products, product codes, stock>];
+    cust    [label=<<b>Customers</b><br/>customer records and history>];
+    dash    [label=<<b>Sales dashboard</b><br/>totals, profit, sales history>];
+  }
+
+  subgraph cluster_util {
+    label="utils/"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    money   [label=<<b>money_format.py</b><br/>Decimal rounding, discount labels,<br/>input sanitising>, fillcolor="#e4eefb", color="#2a6fd6"];
+    receipt [label=<<b>receipt_gen.py</b><br/>HTML receipt per sale>];
+    pdf     [label=<<b>pdf_export.py</b><br/>PDF sales report (ReportLab)>];
+  }
+
+  db   [label=<<b>DBManager</b> (database/db_manager.py)<br/>sqlite3; totals recomputed with Decimal;<br/>stock deducted when a sale is recorded>];
+  file [label=<<b>SQLite file</b><br/>local, no network needed<br/>(path from SHOP_DATABASE_PATH)>, shape=cylinder, style="filled", fillcolor="#f6f6f2"];
+  out  [label=<<b>receipts/</b> (HTML) and PDF exports>, shape=folder, style="filled", fillcolor="#f6f6f2"];
+
+  main -> onboard [label=" first run"];
+  main -> login;
+  login -> layout;
+  layout -> pos; layout -> inv; layout -> cust; layout -> dash;
+  pos -> money [style=dashed]; inv -> money [style=dashed]; dash -> money [style=dashed]; cust -> money [style=dashed];
+  pos -> receipt [label=" after checkout"];
+  dash -> pdf;
+  receipt -> out; pdf -> out;
+  pos -> db; inv -> db; cust -> db; dash -> db; login -> db; onboard -> db;
+  db -> file;
+  {rank=same; pos; inv; cust; dash}
+}

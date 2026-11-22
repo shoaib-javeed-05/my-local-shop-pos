@@ -1,0 +1,63 @@
+// My Local Shop: core SQLite tables behind checkout, inventory, customers, reporting and roles.
+// Columns are a subset of the real schema (database/db_manager.py, private repo).
+// Dashed edge = column used as a link but not declared as a FOREIGN KEY.
+digraph data_model {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=12, nodesep=0.5, ranksep=0.9, pad=0.3, bgcolor="white"];
+  node  [shape=plain, fontname="Helvetica", fontsize=10];
+  edge  [color="#666666", arrowsize=0.7, fontname="Helvetica", fontsize=9];
+
+  users [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#888888">
+    <tr><td bgcolor="#e4eefb"><b>users</b></td></tr>
+    <tr><td align="left" port="id">id (PK)</td></tr>
+    <tr><td align="left">username</td></tr>
+    <tr><td align="left">pin</td></tr>
+    <tr><td align="left">role (admin, cashier, ...)</td></tr>
+    <tr><td align="left">status, last_login</td></tr></table>>];
+
+  products [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#888888">
+    <tr><td bgcolor="#e4eefb"><b>products</b></td></tr>
+    <tr><td align="left" port="id">id (PK)</td></tr>
+    <tr><td align="left">product_code (UNIQUE, PRD-00001)</td></tr>
+    <tr><td align="left">name, category, barcode</td></tr>
+    <tr><td align="left">price, cost_price</td></tr>
+    <tr><td align="left">discount_type, discount_value</td></tr>
+    <tr><td align="left">stock, low_stock_threshold</td></tr></table>>];
+
+  customers [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#888888">
+    <tr><td bgcolor="#e4eefb"><b>customers</b></td></tr>
+    <tr><td align="left" port="id">id (PK)</td></tr>
+    <tr><td align="left">name</td></tr>
+    <tr><td align="left">phone (UNIQUE)</td></tr>
+    <tr><td align="left">current_balance</td></tr></table>>];
+
+  sales [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#888888">
+    <tr><td bgcolor="#e4eefb"><b>sales</b></td></tr>
+    <tr><td align="left" port="id">id (PK)</td></tr>
+    <tr><td align="left" port="user">user_id (FK)</td></tr>
+    <tr><td align="left" port="cust">customer_id</td></tr>
+    <tr><td align="left">subtotal_amount, vip_discount_amount</td></tr>
+    <tr><td align="left">total_amount, payment_method</td></tr>
+    <tr><td align="left">cash_received, change_given</td></tr>
+    <tr><td align="left">sale_date, receipt_html</td></tr></table>>];
+
+  sale_items [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#888888">
+    <tr><td bgcolor="#e4eefb"><b>sale_items</b></td></tr>
+    <tr><td align="left">id (PK)</td></tr>
+    <tr><td align="left" port="sale">sale_id (FK)</td></tr>
+    <tr><td align="left" port="prod">product_id (FK)</td></tr>
+    <tr><td align="left">product_name (snapshot)</td></tr>
+    <tr><td align="left">quantity, price_at_sale</td></tr>
+    <tr><td align="left">cost_price_at_sale</td></tr>
+    <tr><td align="left">product_discount_amount</td></tr></table>>];
+
+  settings [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#888888">
+    <tr><td bgcolor="#e4eefb"><b>settings</b></td></tr>
+    <tr><td align="left">key (PK), value</td></tr>
+    <tr><td align="left">shop_name, shop_address,</td></tr>
+    <tr><td align="left">shop_contact, system_initialized</td></tr></table>>];
+
+  sales:user -> users:id;
+  sales:cust -> customers:id [style=dashed];
+  sale_items:sale -> sales:id;
+  sale_items:prod -> products:id;
+}
